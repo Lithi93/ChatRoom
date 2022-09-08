@@ -1,5 +1,7 @@
 ## NOTES
 
+Markdown language [cheatsheet](https://www.markdownguide.org/cheat-sheet/)
+
 ## Rules:
 1. if some part of code gets redundant it still should be saved to root in to "OLD CODE" folder. with filename "CurrentFileName_old".
 
