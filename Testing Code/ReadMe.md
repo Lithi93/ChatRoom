@@ -1,12 +1,26 @@
 ## All test code and their use can be found in this folder
 Index all used test code here.
 
+
 **Code:**
 
-ExampleFileName1
+Interesting chat [code](https://github.com/Eisah-Jones/MultiRoom-Chat/tree/master/Multi-Room%20Chat)\
+^ pretty messily made, but it might contain some useful tips. Also uses PyQt that we might use too. 
 
-    "Description1"
 
-ExampleFileName2
+Example_client.py
 
-    "Description2"
+[Source](https://www.neuralnine.com/tcp-chat-in-python/)
+
+    - Contains edited version of the source. Fully working (LocalHost). Needs to be paired with Example_server.py
+    - This code only servers as a quide to make fully working ChatRoom
+
+Example_server.py
+
+[Source](https://www.neuralnine.com/tcp-chat-in-python/)
+
+    - Contains edited version of the source. Fully working (LocalHost). Needs to be paired with Example_client.py.
+    - Added some server side features as a test.
+    - This code only servers as a quide to make fully working ChatRoom
+
+
