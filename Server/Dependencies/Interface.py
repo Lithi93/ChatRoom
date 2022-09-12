@@ -48,6 +48,10 @@ class TerminalUI:
             print(f'\t{command} - "{info}"')
 
     # ----------------------------------------
+    # server private functions
+    # ----------------------------------------
+
+    # ----------------------------------------
     # command functions
     # ----------------------------------------
 
@@ -58,3 +62,8 @@ class TerminalUI:
     def stop_server(self):
         """stops server"""
         pass
+
+    def show_connected_clients(self):
+        """shows all currently connected clients"""
+        pass
+
