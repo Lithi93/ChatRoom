@@ -1,6 +1,10 @@
 import sys
 import logging
 
+# MyLibs
+from Server.Dependencies.Interface import TerminalUI
+
+
 # exception logger
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(stream=sys.stdout)
@@ -11,11 +15,6 @@ logger.addHandler(handler)
 Make sw diagram before proceeding!!
 
 """
-
-
-def print_h():
-    print('Hello')
-    raise TypeError
 
 
 def exception_hook(exc_type, exc_value, exc_traceback):
@@ -37,5 +36,7 @@ def exception_hook(exc_type, exc_value, exc_traceback):
 if __name__ == '__main__':
     sys.excepthook = exception_hook  # uncomment if no hook is needed. Running Pycharm on debugger mode disables hook.
 
-    print_h()
+    # call terminal loop, later can be changed to .UI element.
+    UI = TerminalUI()
+    UI.run()
 
