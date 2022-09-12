@@ -2,13 +2,25 @@
 
 Markdown language [cheatsheet](https://www.markdownguide.org/cheat-sheet/)
 
+## File structure:
+
+### ClientMain.py [Main client executable]
+  1. Interface.py
+     1. Client.py  (Connects to server and gets ChatRoom list)
+
+### ServerMain.py [Main server executable]
+  1. Interface.py
+     1. Server.py (Connects a person to Chatroom that is requested)
+        1. ChatRoom (Broadcast messages to connected persons)
+        2. Person (DataClass) (Created on client connection)
+  
 ## Rules:
 1. if some part of code gets redundant it still should be saved to root in to "OLD CODE" folder. with filename "CurrentFileName_old".
 
 ### Mini Goals:
-- [ ] Send message from client to server (Can do LocalHost)
-- [ ] Send message from server to client (Can do LocalHost)
-- [ ] Try sending message from client to client through server
+- [x] Send message from client to server (Can do LocalHost)
+- [x] Send message from server to client (Can do LocalHost)
+- [x] Try sending message from client to client through server
   - **Note!** is not used in actual program, just a test.
 - [ ] Send message to server and then from there to chat room (Can do LocalHost)
   - **Note!** Requires the completion of chat room class. (does not need to be the final version)
