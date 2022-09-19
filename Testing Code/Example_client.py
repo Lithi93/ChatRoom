@@ -14,9 +14,9 @@ def receive():
         try:
             # Receive Message From Server
             # If 'NICK' Send Nickname
-            message = client.recv(1024).decode('ascii')
+            message = client.recv(1024).decode('utf-8')
             if message == 'NICK':
-                client.send(nickname.encode('ascii'))
+                client.send(nickname.encode('utf-8'))
             else:
                 print(message)
         except:
@@ -36,8 +36,8 @@ def write():
         if m in exit_condition:
             break
 
-        message = f'<{datetime.now().time().strftime("%H:%M:%S")}>[{nickname}]: {m}'
-        client.send(message.encode('ascii'))
+        message = f'<{datetime.now().time().strftime("%H:%M:%S")}>[{nickname}]; {m}'
+        client.send(message.encode('utf-8'))
 
 
 if __name__ == '__main__':

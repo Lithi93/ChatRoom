@@ -2,6 +2,9 @@ import socket
 import threading
 import time
 
+from Server.Dependencies.User import Client
+from Server.Dependencies.ChatRooms import ChatRoom
+
 
 class ChatRoomServer:
     def __init__(self, host_ip: str, port: int):
@@ -14,15 +17,106 @@ class ChatRoomServer:
         self._server.bind((host_ip, port))
         self._server.listen()
 
-        # Lists for Clients and their Nicknames
-        self._clients = []
-        self._nicknames = []
+        self._clients: list[Client] = []  # contains client objects
+        self._chatrooms: dict[str:ChatRoom] = {}  # contains chatroom objects {chatroom_name: chatroom_object}
+        self._room_names: list = []  # all the chatroom names
 
         # start listening new connections
         self.receive_thread = threading.Thread(target=self._receive, args=(), daemon=True)
         self.receive_thread.start()
 
+        # check
+        self.check_interval = 5  # seconds
+        self.status_thread = threading.Thread(target=self._client_status, args=(self.check_interval, ), daemon=True)
+        self.status_thread.start()
+
+        self.create_chatroom('Default')  # create default chatroom
+
         print('> Server is running!!')
+
+    # ------------------------------
+    # server control
+    # ------------------------------
+
+    def exiting(self):
+        # stop receiving new clients
+        self.receive_thread.do_run = False
+
+        # shutdown all client connections
+        for client_object in self._clients:
+            client_object.client_socket.close()
+
+        # close server
+        self._server.close()
+        print(f'> Server {self._host} at port: {self._port}. Shutdown!')
+
+        del self
+
+    def _client_status(self, interval: int):
+        """checks if client is alive or not and removes it if it's not alice"""
+        t = threading.current_thread()
+        while getattr(t, "do_run", True):
+            time.sleep(interval)  # check interval
+
+            for i in range(len(self._clients)):
+                client = self._clients[i]  # get client
+
+                # if client is not alive remove it
+                if not client.handle_thread.is_alive():
+
+                    # check if client is in chatroom and remove it from there
+                    for name, chatroom in self._chatrooms.items():
+                        chatroom.remove_participant(client.user_ID)
+
+                    # remove user from server
+                    self._clients.pop(i)
+
+    # ------------------------------
+    # chatroom control
+    # ------------------------------
+
+    def get_chatrooms(self):
+        """returns all chatroom names in the server, and displays them along with user in the rooms"""
+        print(f'Server: {self._host}, port: {self._port} Chatrooms:')
+        for name, chatroom in self._chatrooms.items():
+            chatroom.get_participants()
+
+    def create_chatroom(self, name=''):
+        """makes chatroom to server"""
+
+        if not name:
+            name = input('Chatroom name: ')
+
+        chatroom = ChatRoom(name)
+        self._chatrooms[name] = chatroom
+        self._room_names.append(name)
+
+    def join_chatroom(self, client_uuid: int, old_room: str, new_room: str):
+        """lets client change / join to available chatroom"""
+
+        # find client chatroom that needs to be changed if old_room is not ''
+        # remove client from old room and broadcast that client has left the room.
+        if old_room:
+            old_chatroom: ChatRoom = self._chatrooms[old_room]
+            client = old_chatroom.remove_participant(client_uuid)
+        else:
+            client = [client for client in self._clients if client_uuid == client.user_ID]  # gets client with uuid, should only return one client
+
+            # This part should never happen, but I added this here so inform if it would happen
+            if len(client) >= 2:
+                print(f'CRITICAL ERROR: two of the same user UUID was found! {[c.user_ID for c in client]}')
+                return
+
+            client = client[0]  # get the client out of the list
+
+        # add client to new room and broadcast "client has entered to the room"
+        new_chatroom: ChatRoom = self._chatrooms[new_room]
+        client.current_room = new_chatroom.name  # user is currently in this room
+        new_chatroom.add_participant(client)
+
+    # ------------------------------
+    # client control
+    # ------------------------------
 
     # Receive new client
     def _receive(self):
@@ -38,61 +132,34 @@ class ChatRoomServer:
             print(f"Connected with {address}")
 
             # Request And Store Nickname
-            client.send('NICK'.encode('ascii'))
-            nickname = client.recv(1024).decode('ascii')
-            self._nicknames.append(nickname)
-            self._clients.append(client)
+            client.send('NICK'.encode('utf-8'))
+            nickname = client.recv(1024).decode('utf-8')
 
-            # Print And Broadcast Nickname
+            # create client object and append it to the clients list
+            client_object = Client(nickname, client, address, self._room_names, self.join_chatroom)  # chatroom list is shared with all clients!
+            self._clients.append(client_object)
+
+            # display nickname to server and send user conformation that server connection has been made
             print(f"Nickname is {nickname}")
-            self._broadcast(f"{nickname} joined!".encode('ascii'))
-            client.send('Connected to server!'.encode('ascii'))
+            client_object.send_message('Connected to server!')
 
-            # Start Handling Thread For Client
-            thread = threading.Thread(target=self._handle, args=(client,), daemon=True)
-            thread.start()
+    def get_clients(self):
+        """returns all connected clients"""
+        return self._clients
 
-    # Sending Messages To All Connected Clients
-    def _broadcast(self, message):
-        for client in self._clients:
-            client.send(message)
+    def remove_client(self, user_id: int):
+        """removes user from the server"""
+        for i in range(len(self._clients)):
+            client = self._clients[i]
+            if client.user_ID == user_id:
+                client.send_message('You have been kicked from the server!')
+                time.sleep(1)  # wait second
 
-    # Handling Messages From Clients
-    def _handle(self, client):
-        while True:
-            try:
-                # Broadcasting Messages
-                message = client.recv(1024)
-                self._broadcast(message)
-                print(message.decode('ascii'))  # shows message on the server
-            except:
-                # Removing And Closing Clients
-                index = self._clients.index(client)
-                self._clients.remove(client)
-                client.close()
-                nickname = self._nicknames[index]
+                client.client_socket.close()  # close client connection
 
-                msg = f"{nickname} left the chat!".encode('ascii')
-                self._broadcast(msg)
-                print(msg)  # shows message on the server
+                # check if client is in chatroom and remove it from there
+                for name, chatroom in self._chatrooms.items():
+                    chatroom.remove_participant(client.user_ID)
 
-                self._nicknames.remove(nickname)
-                break
-
-    def get_client_names(self):
-        """returns all connected client names"""
-        return self._nicknames
-
-    def exiting(self):
-        # stop receiving new clients
-        self.receive_thread.do_run = False
-
-        # shutdown all client connections
-        for client in self._clients:
-            client.close()
-
-        # close server
-        self._server.close()
-        print(f'> Server {self._host} at port: {self._port}. Shutdown!')
-
-        del self
+                # remove user from server
+                self._clients.pop(i)

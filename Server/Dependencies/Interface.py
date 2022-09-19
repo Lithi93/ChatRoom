@@ -14,6 +14,9 @@ class TerminalUI:
             "start": (self.start_server, "Starts the server"),
             "stop": (self.stop_server, "Stops the server"),
             "clients": (self.show_connected_clients, "Shows all connected clients"),
+            "kick": (self.kick_client, "Shows all connected clients"),
+            "new room": (self.create_chatroom, "Creates new chatroom to server"),
+            "move to room": (self.go_to_chatroom, "Move to listen some of the chatroom in the server"),
             "close": (None, "Closes application"),
             "exit": (None, "Closes application"),
         }
@@ -90,18 +93,46 @@ class TerminalUI:
         server.exiting()  # stop server
         self.connected_server.pop(index)  # remove it from references
 
-    def show_connected_clients(self):
+    def go_to_chatroom(self):
+        """server joins to chatroom as UBER ADMIN"""
+        # TODO
+        pass
+
+    def create_chatroom(self):
+        """creates new chatroom to the server"""
+        # TODO
+        pass
+
+    def kick_client(self):
+        """kicks client from server"""
+        server = self.get_server(0)
+        status = self.show_connected_clients()
+
+        # if no clients do not continue
+        if not status:
+            return
+
+        try:
+            user_id = int(input('User ID <? '))
+        except ValueError:
+            print('> Only use numbers!')
+        else:
+            server.remove_client(user_id)
+
+    def show_connected_clients(self) -> bool:
         """shows all currently connected clients"""
         server = self.get_server(0)
 
         # check if there is servers and if there is connected clients
         if server is None:
-            return
-        elif not server.get_client_names():
+            return False
+        elif not server.get_clients():
             print('> No connected clients!')
-            return
+            return False
 
         # print out all connected clients
         print('Connected clients:')
-        for client_name in server.get_client_names():
-            print(f'\t{client_name}')
+        for client in server.get_clients():
+            print(f'\tName: {client.name}, From: {client.address}, When: {client.since}, Chatroom: {client.current_room}, Status: {client.handle_thread.is_alive()}, client ID: {client.user_ID}')
+
+        return True
