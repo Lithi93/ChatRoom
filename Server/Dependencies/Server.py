@@ -31,7 +31,7 @@ class ChatRoomServer:
         self.status_thread.start()
 
         self.create_chatroom('Default')  # create default chatroom
-        self.create_chatroom('Default2')  # create default chatroom
+        self.create_chatroom('Default2')  # create default2 chatroom
 
         print('> Server is running!!')
 

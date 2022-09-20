@@ -1,4 +1,5 @@
 import socket
+import time
 import uuid
 import threading
 from datetime import datetime, timedelta
@@ -59,12 +60,16 @@ class Client:
         Handles messages from client and sends them to the connected chatroom.
         This method can also change the chatroom on user command
         """
-        spam_limit = timedelta(seconds=0.5)
+        spam_limit = timedelta(seconds=0.5)  # limits how often user can send message before its counted as spam
+
         offence_count = 0  # current offences
         total_offences = 0  # total offences count
-
         max_offences = 5  # offences until server send notice for spamming
         until_timeout = 5  # if total offences reach this limit, timeout the user for x minutes.
+
+        timeout = False  # if user is timed out this is True
+        timeout_time = timedelta(minutes=1)  # timeout time
+        stop_time = datetime.now()  # when timeout period ends
 
         while True:
             try:
@@ -72,11 +77,23 @@ class Client:
                 raw, _, msg = self.get_incoming_msg()
                 msg_time = datetime.now()
 
+                # timeout user if too much spamming
+                if timeout:
+                    time_now = datetime.now()  # get current time
+                    remaining = stop_time - time_now  # calculate remaining time
+                    if remaining > timedelta(seconds=0):
+                        self.send_message(f'<Server>: {remaining} until new message can be sent')
+                        continue
+                    else:
+                        timeout = False  # stop timeout period
+
                 # timeout user if until_timeout is exceeded
                 if total_offences > until_timeout:
-                    print('NOT IMPLEMENTED: you have been timeout')
+                    self.send_message(f'<Server>: You have been timeout for {timeout_time} minutes.')
+                    stop_time = datetime.now() + timeout_time
+                    timeout = True
                     total_offences = 0
-                    # TODO
+                    continue
 
                 # give warning to user
                 if offence_count > max_offences:
@@ -111,7 +128,7 @@ class Client:
                 # Removing And Closing Clients
                 self.client_socket.close()
 
-                msg = f"{self.name} left the chat!"
+                msg = f"{self.name} left the server!"
                 print(msg)  # shows message on the server
                 break
 
