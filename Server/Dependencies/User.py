@@ -60,8 +60,11 @@ class Client:
         This method can also change the chatroom on user command
         """
         spam_limit = timedelta(seconds=0.5)
-        offence_count = 0
-        max_offences = 5
+        offence_count = 0  # current offences
+        total_offences = 0  # total offences count
+
+        max_offences = 5  # offences until server send notice for spamming
+        until_timeout = 5  # if total offences reach this limit, timeout the user for x minutes.
 
         while True:
             try:
@@ -69,9 +72,16 @@ class Client:
                 raw, _, msg = self.get_incoming_msg()
                 msg_time = datetime.now()
 
+                # timeout user if until_timeout is exceeded
+                if total_offences > until_timeout:
+                    print('NOT IMPLEMENTED: you have been timeout')
+                    total_offences = 0
+                    # TODO
+
                 # give warning to user
                 if offence_count > max_offences:
-                    self.send_message('<Server>: Stop spamming you piece of shit!')
+                    self.send_message('<Server>: Stop spamming!')
+                    total_offences += 1
 
                 # do not accept empty message
                 if not msg:
@@ -93,12 +103,15 @@ class Client:
                     continue
 
                 offence_count = 0  # reset offences when user stops spamming
-                self._message_buffer(raw.decode('utf-8'))
+
+                # only if client is in room buffer messages
+                if self.current_room:
+                    self._message_buffer(raw.decode('utf-8'))
             except:
                 # Removing And Closing Clients
                 self.client_socket.close()
 
-                msg = f"{self.name} left the chat!".encode('utf-8')
+                msg = f"{self.name} left the chat!"
                 print(msg)  # shows message on the server
                 break
 
@@ -133,7 +146,7 @@ class Client:
         # send user all available chat rooms
         msg = 'Chatroom:\n'
         for room in self.chatroom_names:
-            msg += f'\t{room}'
+            msg += f'\t{room}\n'
         self.send_message(msg)
 
         while True:

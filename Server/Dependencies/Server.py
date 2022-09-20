@@ -31,6 +31,7 @@ class ChatRoomServer:
         self.status_thread.start()
 
         self.create_chatroom('Default')  # create default chatroom
+        self.create_chatroom('Default2')  # create default chatroom
 
         print('> Server is running!!')
 
@@ -71,6 +72,26 @@ class ChatRoomServer:
                     # remove user from server
                     self._clients.pop(i)
 
+    def listen_room(self, name: str):
+        """starts listening selected chatroom"""
+        chatroom = self._chatrooms[name]
+        chatroom.server_listening = True  # start listening
+
+        # turn off other chatroom listening
+        for room in self._chatrooms.values():
+            # skip room that server is just now starting to listen
+            if room.name == chatroom.name:
+                continue
+
+            room.server_listening = False  # stop listening
+
+        print(f'> Server is now listening room {chatroom.name}')
+
+    def stop_listen(self):
+        """stops listening rooms"""
+        for room in self._chatrooms.values():
+            room.server_listening = False  # stop listening
+
     # ------------------------------
     # chatroom control
     # ------------------------------
@@ -79,17 +100,31 @@ class ChatRoomServer:
         """returns all chatroom names in the server, and displays them along with user in the rooms"""
         print(f'Server: {self._host}, port: {self._port} Chatrooms:')
         for name, chatroom in self._chatrooms.items():
-            chatroom.get_participants()
+            chatroom.get_participants_details()
 
-    def create_chatroom(self, name=''):
+    def get_chatroom_names(self):
+        """returns chatroom names"""
+        return list(self._chatrooms.keys())
+
+    def create_chatroom(self, name: str):
         """makes chatroom to server"""
-
-        if not name:
-            name = input('Chatroom name: ')
-
         chatroom = ChatRoom(name)
         self._chatrooms[name] = chatroom
         self._room_names.append(name)
+
+    def remove_chatroom(self, name: str):
+        """removes chatroom and returns all the client in it to lobby"""
+
+        # get and remove instances of the chatroom
+        chatroom = self._chatrooms.pop(name)
+        self._room_names.remove(chatroom.name)
+
+        # remove all client from the chatroom and inform that they have been moved to lobby
+        participant_uuid = chatroom.get_participant_uuid()
+        for id in participant_uuid:
+            client = chatroom.remove_participant(id, info=False)  # do not info client that other clients left the room
+            client.current_room = ''  # is user is forcible remove default the current room
+            client.send_message(f'<server>: Chatroom "{chatroom.name}" was closed, you have been returned to the lobby.')  # inform user that he has been moved to the lobby
 
     def join_chatroom(self, client_uuid: int, old_room: str, new_room: str):
         """lets client change / join to available chatroom"""

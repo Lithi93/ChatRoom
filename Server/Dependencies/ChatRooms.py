@@ -11,7 +11,7 @@ class ChatRoom:
         self.name: str = name  # name of the chatroom
         self._clients: list[Client] = []  # connected clients in the chatroom
         self.chat_log: list[str] = []  # contains all messages sent in the chatroom
-        self._server_listening = False
+        self.server_listening = False  # set to True to start listening this room
 
         # while chatroom is active be ready to receive messages
         self.active = True
@@ -52,7 +52,7 @@ class ChatRoom:
             client.send_message(message)
 
         # shows message on the server if the server is listening
-        if self._server_listening:
+        if self.server_listening:
             print(message)
 
         self.chat_log.append(message)  # record message
@@ -73,24 +73,40 @@ class ChatRoom:
         """adds client to chatroom"""
         self._clients.append(client)
 
-        msg = f'{client.name} joined to the Chatroom!'
+        msg = f'{client.name} joined to the Chatroom "{self.name}"!'
         self.broadcast(msg)
 
-    def remove_participant(self, client_uuid: int) -> Client or None:
-        """remove client from chatroom and returns it, if client did not exist return None"""
-        for clients in self._clients:
-            if clients.user_ID == client_uuid:
-                client = clients
+    def remove_participant(self, client_uuid: int, info=True) -> Client or None:
+        """
+        remove client from chatroom and returns it, if client did not exist return None.
+        :param client_uuid: int, clients ID
+        :param info: bool, default True. Informs chatroom if someone left the room.
+        """
+
+        for i in range(len(self._clients)):
+            client = self._clients[i]
+            if client.user_ID == client_uuid:
+                found_client = self._clients.pop(i)
                 break
         else:
             return None  # if no client found
 
-        msg = f'<{datetime.now()}> {client.name} left to the Chatroom!'
-        self.broadcast(msg, excluded=[client.user_ID])
+        if info:
+            # inform other users in the chatroom that this user has left the room
+            msg = f'<{datetime.now()}> {found_client.name} left to the Chatroom!'
+            self.broadcast(msg, excluded=[found_client.user_ID])
 
-        return client
+        return found_client
 
-    def get_participants(self):
+    def get_participant_uuid(self):
+        """returns all participant uuids"""
+        return [client.user_ID for client in self._clients]
+
+    def get_clients(self):
+        """returns client_objects in the chatroom"""
+        return self._clients
+
+    def get_participants_details(self):
         """returns all participants as string"""
         print(f'Chatroom: {self.name}')
         for client in self._clients:
