@@ -6,10 +6,8 @@ from datetime import datetime, timedelta
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:  # to avoid circular import error
-    from Server.Dependencies.ChatRooms import ChatRoom
+    from ChatRooms import ChatRoom
 
-
-# field(init=False)
 
 """
 once user is connected to the chatroom by the user action it should send the messages to that chatroom.
@@ -28,9 +26,10 @@ class Client:
         self.user_ID: int = int(uuid.uuid1())  # generate random ID for the user
         self.since = datetime.now()  # when user connected
 
-        # all client commands
+        # all client commands. Commands should always start with \
         self._commands = {
-            '\\join': self.room_change,
+            '\\?': (self.show_commands, 'Shows available commands'),
+            '\\join': (self.room_change, 'Join available chatroom'),
         }
 
         # contains all messages from client that has not been sent yet
@@ -112,7 +111,7 @@ class Client:
                 # execute client command if detected
                 if msg in self._commands.keys():
                     try:
-                        f = self._commands[msg]
+                        f, _ = self._commands[msg]
                     except Exception as e:
                         print(f'Client command caused and issue - {e}')
                     else:
@@ -175,3 +174,13 @@ class Client:
                 break
             else:
                 self.send_message(f'> No "{msg}" chatroom exists!')
+
+    def show_commands(self):
+        """shows all available commands to the client"""
+
+        msg = 'Commands:\n'
+        for command, items in self._commands.items():
+            _, info = items
+            msg += f'\t{command} - "{info}"\n'
+
+        self.send_message(msg)

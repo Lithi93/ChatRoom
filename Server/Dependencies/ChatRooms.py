@@ -3,7 +3,7 @@ import threading
 import time
 from datetime import datetime
 
-from Server.Dependencies.User import Client
+from Dependencies.ServerSideUser import Client
 
 
 class ChatRoom:

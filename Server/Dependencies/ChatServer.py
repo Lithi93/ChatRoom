@@ -2,8 +2,8 @@ import socket
 import threading
 import time
 
-from Server.Dependencies.User import Client
-from Server.Dependencies.ChatRooms import ChatRoom
+from Dependencies.ServerSideUser import Client
+from Dependencies.ChatRooms import ChatRoom
 
 
 class ChatRoomServer:
@@ -54,13 +54,17 @@ class ChatRoomServer:
         del self
 
     def _client_status(self, interval: int):
-        """checks if client is alive or not and removes it if it's not alice"""
+        """checks if client is alive or not and removes it if it's not alive"""
         t = threading.current_thread()
         while getattr(t, "do_run", True):
             time.sleep(interval)  # check interval
 
             for i in range(len(self._clients)):
-                client = self._clients[i]  # get client
+                try:
+                    client = self._clients[i]  # get client
+                except IndexError:
+                    print('Index error while chacking if ')
+                    break
 
                 # if client is not alive remove it
                 if not client.handle_thread.is_alive():
@@ -166,6 +170,7 @@ class ChatRoomServer:
 
             print(f"Connected with {address}")
 
+            # TODO ConnectionResetError
             # Request And Store Nickname
             client.send('NICK'.encode('utf-8'))
             nickname = client.recv(1024).decode('utf-8')
@@ -176,7 +181,7 @@ class ChatRoomServer:
 
             # display nickname to server and send user conformation that server connection has been made
             print(f"Nickname is {nickname}")
-            client_object.send_message('Connected to server!')
+            client_object.send_message('Connected to server!\nWelcome to the lobby. You can see all the commands with \\? command')
 
     def get_clients(self):
         """returns all connected clients"""

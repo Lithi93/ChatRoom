@@ -2,7 +2,7 @@ import sys
 import logging
 
 # MyLibs
-from Server.Dependencies.Interface import TerminalUI
+from Dependencies.Interface import TerminalUI
 
 
 # exception logger

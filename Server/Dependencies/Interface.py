@@ -1,6 +1,14 @@
 
 # MyLibs
-from Server.Dependencies.Server import ChatRoomServer
+from Dependencies.ChatServer import ChatRoomServer
+
+
+# hostname = socket.gethostname()
+# local_ip = socket.gethostbyname(hostname)
+# my_ip: str = local_ip  # get local IP automatically
+
+my_ip: str = '127.0.0.1'  # localhost for testing
+my_port: int = 55555  # port number
 
 
 class TerminalUI:
@@ -82,10 +90,7 @@ class TerminalUI:
 
     def start_server(self):
         """starts and initializes server"""
-
-        # TODO release part of the code should automatically use global IP address of the server location
-
-        server = ChatRoomServer('127.0.0.1', 55555)
+        server = ChatRoomServer(my_ip, my_port)
         self.connected_server.append(server)
 
     def stop_server(self):
