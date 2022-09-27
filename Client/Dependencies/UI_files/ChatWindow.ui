@@ -27,73 +27,22 @@
     <property name="bottomMargin">
      <number>11</number>
     </property>
-    <item row="6" column="1">
-     <widget class="QPushButton" name="SendButton">
-      <property name="statusTip">
-       <string>Press to send message or press enter to send message</string>
-      </property>
-      <property name="text">
-       <string>Send</string>
-      </property>
-      <property name="autoDefault">
-       <bool>true</bool>
-      </property>
-      <property name="default">
-       <bool>true</bool>
+    <item row="5" column="0" colspan="3">
+     <widget class="QLineEdit" name="SendBox">
+      <property name="placeholderText">
+       <string>Type here. Press enter to send...</string>
       </property>
      </widget>
     </item>
-    <item row="6" column="0">
-     <widget class="QLineEdit" name="SendBox"/>
-    </item>
-    <item row="2" column="2" rowspan="5" colspan="2">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Preferred</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QListWidget" name="ParticipantsList">
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAsNeeded</enum>
-        </property>
-        <item>
-         <property name="text">
-          <string>Participants in chatroom</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QToolButton" name="minimizeToolButton">
-        <property name="text">
-         <string>-</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="2" column="0" rowspan="4" colspan="2">
-     <widget class="QTextEdit" name="ChatBox">
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOn</enum>
+    <item row="1" column="4">
+     <widget class="QToolButton" name="minimizeToolButton">
+      <property name="text">
+       <string>-</string>
       </property>
      </widget>
     </item>
     <item row="1" column="0" colspan="2">
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="label_connection">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -103,6 +52,37 @@
       <property name="text">
        <string>Connection status: Not connected</string>
       </property>
+     </widget>
+    </item>
+    <item row="2" column="0" rowspan="3" colspan="3">
+     <widget class="QTextEdit" name="ChatBox">
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="textInteractionFlags">
+       <set>Qt::NoTextInteraction</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3" rowspan="4" colspan="2">
+     <widget class="QListWidget" name="ParticipantsList">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAsNeeded</enum>
+      </property>
+      <item>
+       <property name="text">
+        <string>Participants in chatroom</string>
+       </property>
+      </item>
      </widget>
     </item>
    </layout>
@@ -120,7 +100,7 @@
     <property name="title">
      <string>Menu</string>
     </property>
-    <addaction name="actionConnect_2"/>
+    <addaction name="actionConnect"/>
     <addaction name="actionSettings"/>
     <addaction name="actionCommands"/>
     <addaction name="separator"/>
@@ -176,25 +156,20 @@
     <string>Size</string>
    </property>
   </action>
-  <action name="actionConnect">
-   <property name="text">
-    <string>Connect</string>
-   </property>
-  </action>
-  <action name="actionConnect_2">
-   <property name="text">
-    <string>Connect</string>
-   </property>
-  </action>
   <action name="actionLocal_echo">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Local echo</string>
+   </property>
+  </action>
+  <action name="actionConnect">
+   <property name="text">
+    <string>Connect</string>
    </property>
   </action>
  </widget>

@@ -58,71 +58,6 @@ def get_host_settings() -> (str, int, socket.socket):
             return host_ip, host_port, client_socket
 
 
-def write_setup(host_ip: str, host_port: int):
-    """writes setup file of the host"""
-    path = host_settings_path
-
-    # if setup folder is missing create it
-    if not os.path.isdir('Setup'):
-        os.makedirs('Setup')
-
-    # setup file
-    with open(path, 'w') as f:
-        f.write(f'[IP]={host_ip}\n')
-        f.write(f'[Port]={host_port}\n')
-        f.write(';\n')
-
-
-def setup() -> (str, int) or (None, None):
-    """if setup file read it"""
-    path = host_settings_path
-
-    # if setup folder is missing create it
-    if not os.path.isdir('Setup'):
-        os.makedirs('Setup')
-
-    # read file
-    setup_file = []
-    host_ip = None
-    host_port = None
-
-    try:
-        with open(path, 'r') as f:
-            setup_file = f.readlines()
-    except FileNotFoundError:
-        return host_ip, host_port
-
-    # get ip and port
-    for row in setup_file:
-        if ';' in row:
-            continue
-
-        header, value = row.split('=')
-
-        if 'IP' in header:
-            host_ip = str(value[:-1])
-        elif 'Port' in header:
-            try:
-                host_port = int(value[:-1])
-            except ValueError:
-                continue
-
-    return host_ip, host_port
-
-
-def get_nickname() -> str:
-    """gets nickname from the user"""
-    while True:
-        # nickname
-        nick = str(input('Your nickname?: ')).strip()
-
-        # confirm selection
-        y = input(f'Your nickname is {nick}. Continue [Y]?: ').strip().lower()
-
-        if y == 'y':
-            return nick
-
-
 def exception_hook(exc_type, exc_value, exc_traceback):
     # ignore keyboard interruptions "ctrl + c"
     if issubclass(exc_type, KeyboardInterrupt):
@@ -141,13 +76,6 @@ def exception_hook(exc_type, exc_value, exc_traceback):
 
 if __name__ == '__main__':
     sys.excepthook = exception_hook  # uncomment if no hook is needed. Running Pycharm on debugger mode disables hook.
-
-    # ip, port, s = get_host_settings()  # get host details and create socket
-    # name = get_nickname()  # get user nickname
-
-    # starts connection with server
-    # user = Client(name, ip, port, s)
-    # user.write()
 
     app = QtWidgets.QApplication(sys.argv)
     window = ClientUI()
