@@ -63,7 +63,7 @@ class ChatRoomServer:
                 try:
                     client = self._clients[i]  # get client
                 except IndexError:
-                    print('Index error while chacking if ')
+                    print('NOTICE: Index error while checking if client was alive')
                     break
 
                 # if client is not alive remove it

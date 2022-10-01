@@ -22,7 +22,29 @@ class Client:
 
         # received messages
         self.received_messages = []  # contains all received message in received order
-        self.received_messages_plus = []  # contains all received message plus local echoes
+
+        # message buffer
+        self.buffer = []  # contains all received messages until the buffer is emptied (in get_buffer())
+
+        # chatroom names
+        self._names = []  # all participant names in the current chatroom
+
+        # query types that client can store
+        self.queries = {
+            '<names>': self._store_names,
+        }
+
+    # ------------------------
+    # gets
+    # ------------------------
+
+    def get_names(self):
+        """returns participant names"""
+        return self._names
+
+    # ------------------------
+    # Basic communication
+    # ------------------------
 
     # Listening to Server and Sending Nickname
     def _receive(self):
@@ -35,12 +57,24 @@ class Client:
                 if message == 'NICK':
                     self._client_socket.send(self.nickname.encode('utf-8'))
                 else:
-                    self.received_messages.append(message)  # append message
+                    # if received message is query
+                    if '<query>;' in message:
+                        self._receive_query(message)
+                        continue
+
+                    self.buffer.append(message)  # append to buffer message
             except:
                 # Close Connection When Error
                 print("An error occurred!")
                 self._client_socket.close()
                 break
+
+    def get_buffer(self) -> list:
+        """returns all messages from the buffer"""
+        buffer = self.buffer.copy()  # copy buffer content
+        self.buffer.clear()  # clear buffer
+        self.received_messages += buffer  # add messages to received messages
+        return buffer  # return buffer
 
     # Sending Messages To Server
     def write(self, m: str):
@@ -50,3 +84,32 @@ class Client:
         """
         message = f'<{datetime.now().time().strftime("%H:%M:%S")}>[{self.nickname}]; {m}'
         self._client_socket.send(message.encode('utf-8'))
+
+    # ------------------------
+    # receive queries
+    # ------------------------
+
+    def _receive_query(self, message: str):
+        """receives query from server"""
+        # <query>; <names>; ['JV']
+        query, query_type, data = message.split(';')
+        query_type = query_type.strip()
+        data = data.strip()
+
+        if query_type in self.queries.keys():
+            method = self.queries[query_type]
+            method(data)
+
+    # ------------------------
+    # store queries
+    # ------------------------
+
+    def _store_names(self, *argv):
+        """stores current chatroom participant names"""
+        names: str = argv[0]  # get names
+
+        # remove chars from the names
+        for char in ['[', ']', "\'", " "]:
+            names = names.replace(char, '')
+
+        self._names = names.split(',')  # store all names

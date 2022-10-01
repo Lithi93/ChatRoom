@@ -141,7 +141,7 @@ class Client:
         """handles all messages user send from _handle"""
         self._current_buffer.append(msg)
 
-    def get_message(self):
+    def get_message(self) -> list:
         """returns whole buffer and empties it"""
         msg = self._current_buffer.copy()
         self._current_buffer.clear()
@@ -162,7 +162,7 @@ class Client:
         # send user all available chat rooms
         msg = 'Chatroom:\n'
         for room in self.chatroom_names:
-            msg += f'\t{room}\n'
+            msg += f'- {room}\n'
         self.send_message(msg)
 
         while True:
@@ -181,6 +181,6 @@ class Client:
         msg = 'Commands:\n'
         for command, items in self._commands.items():
             _, info = items
-            msg += f'\t{command} - "{info}"\n'
+            msg += f'{command} - "{info}"\n'
 
         self.send_message(msg)

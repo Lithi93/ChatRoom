@@ -18,6 +18,11 @@ class ChatRoom:
         self.incoming = threading.Thread(target=self._incoming_messages, daemon=True)
         self.incoming.start()
 
+        # client queries
+        self.queries = {
+            '\\participants': self.in_the_room,
+        }
+
     # ------------------
     # message handling
     # ------------------
@@ -29,8 +34,14 @@ class ChatRoom:
 
             new_messages = []  # TODO <- these might be needed to be sorted depending on the timestamp in them
             for client in self._clients:
-                messages = client.get_message()  # get current message buffer from the client
+                messages: list[str] = client.get_message()  # get current message buffer from the client
+
                 if messages:
+                    # check if message is a query
+                    if self.if_query(messages):
+                        self.do_query(client, messages)
+                        continue
+
                     new_messages += messages
 
             # broadcast all new messages
@@ -65,6 +76,35 @@ class ChatRoom:
                 client.client_socket.send(message)
                 break
 
+    # ----------------
+    # client queries
+    # ----------------
+
+    @classmethod
+    def if_query(cls, message: list) -> bool:
+        """checks if sent message is query"""
+        _, query = message[0].split(';', 1)
+        if '\\' == query.strip()[0]:
+            return True
+        return False
+
+    def do_query(self, client: Client, message: list):
+        """does query and sends it to the client"""
+        _, query = message[0].split(';', 1)
+        query = query.strip()
+
+        # check if query exists
+        if query in self.queries.keys():
+            method = self.queries[query]
+            method(client)  # query always take in client!!
+        else:
+            client.send_message('Server: no such query exist!')
+
+    def in_the_room(self, client: Client):
+        """send user all client names in the current chatroom"""
+        client_names = [client.name for client in self._clients]
+        client.send_message(f'<query>; <names>; {client_names}')  # <query>; <type>; data
+
     # ------------------
     # participant handling
     # ------------------
@@ -75,6 +115,10 @@ class ChatRoom:
 
         msg = f'{client.name} joined to the Chatroom "{self.name}"!'
         self.broadcast(msg)
+
+        # send new participant list to all clients
+        for client in self._clients:
+            self.in_the_room(client)
 
     def remove_participant(self, client_uuid: int, info=True) -> Client or None:
         """
@@ -95,6 +139,10 @@ class ChatRoom:
             # inform other users in the chatroom that this user has left the room
             msg = f'<{datetime.now()}> {found_client.name} left to the Chatroom!'
             self.broadcast(msg, excluded=[found_client.user_ID])
+
+        # send new participant list to all clients
+        for client in self._clients:
+            self.in_the_room(client)
 
         return found_client
 
