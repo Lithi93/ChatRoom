@@ -60,7 +60,8 @@ class ChatRoom:
             if client.user_ID in excluded:
                 continue
 
-            client.send_message(message)
+            if client.handle_thread.is_alive():
+                client.send_message(message)
 
         # shows message on the server if the server is listening
         if self.server_listening:

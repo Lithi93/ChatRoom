@@ -3,3 +3,4 @@ Client/CrashLog.log
 Server/CrashLog.log
 Server/Dependencies/__pycache__/
 Client/Dependencies/__pycache__/
+Client/Setup/host_setting.dat

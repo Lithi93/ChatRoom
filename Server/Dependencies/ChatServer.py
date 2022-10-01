@@ -182,6 +182,7 @@ class ChatRoomServer:
             other_names = [client.name for client in self._clients]
             if nickname in other_names:
                 client.send('NOTICE: User name already taken.'.encode('utf-8'))
+                client.send('<ShutDown>;'.encode('utf-8'))  # send shutdown command to the client
                 client.close()
                 continue
 

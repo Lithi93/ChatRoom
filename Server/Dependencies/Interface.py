@@ -26,7 +26,6 @@ class TerminalUI:
             "kick": (self.kick_client, "Kick client from the server"),
             "new room": (self.create_chatroom, "Creates new chatroom to server"),
             "remove room": (self.remove_chatroom, "Removes chatroom from server"),
-            "move to room": (self.go_to_chatroom, "Move to chatroom."),
             "listen room": (self.listen_chatroom, "Listen the chatroom in the server"),
             "stop listen": (self.stop_listening, "Stops listening rooms"),
             "close": (None, "Closes application"),
@@ -42,6 +41,7 @@ class TerminalUI:
     def run(self):
         """starts interactive terminal loop"""
         print('--Server Terminal--')
+        print(f'IP: {my_ip}, Port: {my_port}')
         print('> Type ? to display all available commands')
         while True:
             user_input = input('< ').strip().lower()  # collect users input
@@ -68,7 +68,6 @@ class TerminalUI:
         for command, items in self.commands.items():
             _, info = items
 
-            # TODO make so that command and info part are straight in their columns
             print(f'\t{command} - "{info}"')
 
     def get_server(self, index: int):
@@ -104,11 +103,6 @@ class TerminalUI:
 
         server.exiting()  # stop server
         self.connected_server.pop(index)  # remove it from references
-
-    def go_to_chatroom(self):
-        """server joins to chatroom as UBER ADMIN"""
-        # TODO
-        pass
 
     def listen_chatroom(self):
         """starts listening chatroom"""

@@ -62,6 +62,10 @@ class Client:
                         self._receive_query(message)
                         continue
 
+                    # if server has disconnected the client. If this part is removed the client _receive thread won't shutdown when server disconnects it
+                    if '<ShutDown>;' in message:
+                        break
+
                     if message:
                         self.buffer.append(message)  # append to buffer message
             except Exception as e:
@@ -93,7 +97,6 @@ class Client:
 
     def _receive_query(self, message: str):
         """receives query from server"""
-        # <query>; <names>; ['JV']
         query, query_type, data = message.split(';')
         query_type = query_type.strip()
         data = data.strip()
