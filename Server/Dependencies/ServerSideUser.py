@@ -160,7 +160,7 @@ class Client:
         """lets user change chatroom"""
 
         # send user all available chat rooms
-        msg = 'Chatroom:\n'
+        msg = 'Chatroom: (names are case sensitive)\n'
         for room in self.chatroom_names:
             msg += f'- {room}\n'
         self.send_message(msg)

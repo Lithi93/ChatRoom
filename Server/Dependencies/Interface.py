@@ -1,3 +1,4 @@
+import socket
 
 # MyLibs
 from Dependencies.ChatServer import ChatRoomServer

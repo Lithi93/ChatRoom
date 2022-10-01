@@ -62,12 +62,14 @@ class Client:
                         self._receive_query(message)
                         continue
 
-                    self.buffer.append(message)  # append to buffer message
-            except:
+                    if message:
+                        self.buffer.append(message)  # append to buffer message
+            except Exception as e:
                 # Close Connection When Error
-                print("An error occurred!")
+                print(f"An error occurred! - {e}")
                 self._client_socket.close()
                 break
+        return
 
     def get_buffer(self) -> list:
         """returns all messages from the buffer"""

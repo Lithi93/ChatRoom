@@ -1,5 +1,6 @@
 import os
 import socket
+import time
 from datetime import datetime
 
 # PyQt5
@@ -70,7 +71,7 @@ class ClientUI(QtWidgets.QMainWindow):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         if not self.host_ip or not self.host_port or not self.nickname:
-            msg = 'NOTICE: ip, port or nickname was missing. Could not connect.'
+            msg = 'NOTICE: ip, port or nickname was missing. Could not connect. See settings menu.'
             self._add_msg(msg, True)
             return
 
@@ -117,6 +118,8 @@ class ClientUI(QtWidgets.QMainWindow):
         """updates chatBox with the newest message from the server and local. Also updates the participant list"""
         messages = self.client.get_buffer()
         for row in messages:
+            if not row:
+                continue
             self._add_msg(row, True)
 
         # update participant list
@@ -130,6 +133,10 @@ class ClientUI(QtWidgets.QMainWindow):
                     self.ParticipantsList.clear()
                     self.ParticipantsList.addItem('Participants in chatroom')
                     self.ParticipantsList.addItems(participants)
+
+        if not self.client.receive_thread.is_alive():
+            self.chat_update_intv.stop()  # start
+            self.connect_status('Not connected')
 
     def _add_msg(self, msg: str, timestamp=False):
         """

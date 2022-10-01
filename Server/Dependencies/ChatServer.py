@@ -4,6 +4,7 @@ import time
 
 from Dependencies.ServerSideUser import Client
 from Dependencies.ChatRooms import ChatRoom
+from Dependencies.UserLogin import Login
 
 
 class ChatRoomServer:
@@ -20,6 +21,9 @@ class ChatRoomServer:
         self._clients: list[Client] = []  # contains client objects
         self._chatrooms: dict[str:ChatRoom] = {}  # contains chatroom objects {chatroom_name: chatroom_object}
         self._room_names: list = []  # all the chatroom names
+
+        # initialize login object. Handles all login event and creating new accounts
+        self.login = Login()
 
         # start listening new connections
         self.receive_thread = threading.Thread(target=self._receive, args=(), daemon=True)
@@ -170,10 +174,19 @@ class ChatRoomServer:
 
             print(f"Connected with {address}")
 
-            # TODO ConnectionResetError
             # Request And Store Nickname
             client.send('NICK'.encode('utf-8'))
             nickname = client.recv(1024).decode('utf-8')
+
+            # only accept one of all each nickname
+            other_names = [client.name for client in self._clients]
+            if nickname in other_names:
+                client.send('NOTICE: User name already taken.'.encode('utf-8'))
+                client.close()
+                continue
+
+            # TODO login user or create new one
+            # self.login.setup_user()
 
             # create client object and append it to the clients list
             client_object = Client(nickname, client, address, self._room_names, self.join_chatroom)  # chatroom list is shared with all clients!
