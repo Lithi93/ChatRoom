@@ -22,9 +22,9 @@ Markdown language [cheatsheet](https://www.markdownguide.org/cheat-sheet/)
 - [x] Send message from server to client (Can do LocalHost)
 - [x] Try sending message from client to client through server
   - **Note!** is not used in actual program, just a test.
-- [ ] Send message to server and then from there to chat room (Can do LocalHost)
+- [x] Send message to server and then from there to chat room (Can do LocalHost)
   - **Note!** Requires the completion of chat room class. (does not need to be the final version)
-- [ ] Hash the messages that are sent to chat room, so that only client with password can decode the hash (MD5 hash is okay for now)
+- [x] Encrypt the messages that are sent to chat room, so that only client with password can decode the encryption 
 
 
 ### Final Version Requirements:

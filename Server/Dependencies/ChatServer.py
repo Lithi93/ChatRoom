@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+from os import urandom
 
 from Dependencies.ServerSideUser import Client
 from Dependencies.ChatRooms import ChatRoom
@@ -12,6 +13,7 @@ class ChatRoomServer:
         # Connection Data
         self._host = host_ip
         self._port = port
+        self._salt = urandom(16)  # salt is send to every new connection
 
         # Starting Server
         self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,8 +36,8 @@ class ChatRoomServer:
         self.status_thread = threading.Thread(target=self._client_status, args=(self.check_interval, ), daemon=True)
         self.status_thread.start()
 
-        self.create_chatroom('Default')  # create default chatroom
-        self.create_chatroom('Default2')  # create default2 chatroom
+        self.create_chatroom('\\Default')  # create default chatroom
+        self.create_chatroom('\\Default2')  # create default2 chatroom
 
         print('> Server is running!!')
 
@@ -196,6 +198,7 @@ class ChatRoomServer:
             # display nickname to server and send user conformation that server connection has been made
             print(f"Nickname is {nickname}")
             client_object.send_message('Connected to server!\nWelcome to the lobby. You can see all the commands with \\? command')
+            client_object.send_message(f'<SALT>;{self._salt}')  # send salt to all user that connect
 
     def get_clients(self):
         """returns all connected clients"""

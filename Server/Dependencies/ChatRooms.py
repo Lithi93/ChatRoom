@@ -23,6 +23,13 @@ class ChatRoom:
             '\\participants': self.in_the_room,
         }
 
+        # contains forbidden sentences from user that are struck from messages
+        self.forbidden = [
+            '<ShutDown>;',
+            '<SALT>;',
+            '<query>;',
+        ]
+
     # ------------------
     # message handling
     # ------------------
@@ -51,8 +58,15 @@ class ChatRoom:
     def broadcast(self, message: str, excluded=None):
         """broadcasts messages in the room"""
 
+        # if excluded user
         if excluded is None:
             excluded = []
+
+        # if forbidden message in message don't send it.
+        # TODO this is a for attack that user might use, sentences in forbidden are used to control / inform client side of the code.
+        for f in self.forbidden:
+            if f in message:
+                return
 
         # broadcast message to all users in the chatroom
         for client in self._clients:

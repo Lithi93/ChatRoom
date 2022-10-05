@@ -24,6 +24,7 @@ class ClientUI(QtWidgets.QMainWindow):
         self.nickname: str = ''
         self.host_ip: str = '127.0.0.1'
         self.host_port: int = 55555
+        self.encryption_key: str = ''
 
         self.local_echo = True  # if send messages will be echoed in the chatBox
 
@@ -84,7 +85,7 @@ class ClientUI(QtWidgets.QMainWindow):
             msg = f'NOTICE: server might not be ON or IP address was not correct.'
             self._add_msg(msg, True)
         else:
-            self.client = Client(self.nickname, self.host_ip, self.host_port, client_socket)  # create client object
+            self.client = Client(self.nickname, self.host_ip, self.host_port, client_socket, self.encryption_key)  # create client object
             self.chat_update_intv.start(1)  # start
             self.connect_status('Connected')
 
@@ -93,7 +94,10 @@ class ClientUI(QtWidgets.QMainWindow):
         msg = self.SendBox.text()
 
         if self.client is not None and self.client.receive_thread.is_alive():
-            self.client.write(msg)
+            if msg[0] == '\\':  # check if it's request to server
+                self.client.write(msg, False)
+            else:
+                self.client.write(msg)
 
         # if local echo is ON echo sent message in the ChatBox
         if self.local_echo:
@@ -277,13 +281,18 @@ class ClientUI(QtWidgets.QMainWindow):
     def get_settings(self):
         """gets user settings from user dialogue"""
         sd = SettingsWindow()
-        sd.set_current(self.nickname, self.host_ip, str(self.host_port))  # set current value to the inputs
+        sd.set_current(self.nickname, self.host_ip, str(self.host_port), self.encryption_key)  # set current value to the inputs
         event = sd.exec_()
 
         if event:
             self.nickname = sd.nickname
             self.host_ip = sd.ip
             self.host_port = sd.port
+            self.encryption_key = sd.password
+
+            # if client is already created, generate new encryption fernet with new password
+            if self.client is not None and self.encryption_key:
+                self.client.generate_key(self.encryption_key)
 
             self.write_settings(self.host_ip, self.host_port, self.nickname, self.font_family, self.font_size, self.text_color)
 
@@ -323,11 +332,13 @@ class SettingsWindow(QDialog):
         self.nickname: str = ''
         self.ip: str = ''
         self.port: int = 0
+        self.password = ''
 
         # used line edits
         self.name_lineEdit: QLineEdit
         self.ip_lineEdit: QLineEdit
         self.port_lineEdit: QLineEdit
+        self.lineEdit_password: QLineEdit
 
         # buttons
         self.buttonBox: QDialogButtonBox
@@ -341,14 +352,16 @@ class SettingsWindow(QDialog):
         self.nickname = self.name_lineEdit.text()
         self.ip = self.ip_lineEdit.text()
         self.port = int(self.port_lineEdit.text())
+        self.password = self.lineEdit_password.text()
 
         self.accept()  # accept values
 
-    def set_current(self, name: str, ip: str, port: str):
+    def set_current(self, name: str, ip: str, port: str, password: str):
         """sets current value to the QLineEdits"""
         self.name_lineEdit.setText(name)
         self.ip_lineEdit.setText(ip)
         self.port_lineEdit.setText(port)
+        self.lineEdit_password.setText(password)
 
 
 class FontOptions(QDialog):

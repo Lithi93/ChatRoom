@@ -90,6 +90,8 @@ class TerminalUI:
 
     def start_server(self):
         """starts and initializes server"""
+
+        # create new server
         server = ChatRoomServer(my_ip, my_port)
         self.connected_server.append(server)
 
@@ -161,14 +163,15 @@ class TerminalUI:
                 continue
 
             # confirm name input
-            done = str(input(f'Name "{name}" selected. Continue? [Y]: ')).strip().lower()
+            done = str(input(f'Chatroom name "{name}". Continue? [Y]: ')).strip().lower()
 
             # if confirmed break out
             if done == 'y':
+                name = f'\\{name}'
                 break
 
         # create new chatroom
-        server.create_chatroom(name=name)
+        server.create_chatroom(name)
         print(f'> New chatroom "{name}" created!')
 
     def remove_chatroom(self):
