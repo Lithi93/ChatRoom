@@ -4,19 +4,14 @@ import socket
 from Dependencies.ChatServer import ChatRoomServer
 
 
-# hostname = socket.gethostname()
-# local_ip = socket.gethostbyname(hostname)
-# my_ip: str = local_ip  # get local IP automatically
-
-my_ip: str = '127.0.0.1'  # localhost for testing
-my_port: int = 55555  # port number
-
-
 class TerminalUI:
     # class permanent immutable variables here!
 
     def __init__(self):
         # Class object instance variables here!
+
+        self.local_host = True
+        self.port = 55555
 
         self.commands: dict = {  # Example //// "command call name": (func(), "description"),
             "?": (self.get_commands, "Displays all commands"),
@@ -41,7 +36,6 @@ class TerminalUI:
     def run(self):
         """starts interactive terminal loop"""
         print('--Server Terminal--')
-        print(f'IP: {my_ip}, Port: {my_port}')
         print('> Type ? to display all available commands')
         while True:
             user_input = input('< ').strip().lower()  # collect users input
@@ -90,8 +84,17 @@ class TerminalUI:
 
     def start_server(self):
         """starts and initializes server"""
+        my_port: int = self.port  # port number
+
+        if self.local_host:
+            my_ip: str = '127.0.0.1'  # localhost for testing
+        else:
+            hostname = socket.gethostname()
+            local_ip = socket.gethostbyname(hostname)
+            my_ip: str = local_ip  # get local IP automatically
 
         # create new server
+        print(f'server at IP: {my_ip}, Port: {my_port}')
         server = ChatRoomServer(my_ip, my_port)
         self.connected_server.append(server)
 

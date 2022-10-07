@@ -4,8 +4,8 @@ Index all used test code here.
 
 **Code:**
 
-Interesting chat [code](https://github.com/Eisah-Jones/MultiRoom-Chat/tree/master/Multi-Room%20Chat)\
-^ pretty messily made, but it might contain some useful tips. Also uses PyQt that we might use too. 
+Interesting chat example [code](https://github.com/Eisah-Jones/MultiRoom-Chat/tree/master/Multi-Room%20Chat)\
+^ it might contain some useful tips.
 
 
 Example_client.py
@@ -23,3 +23,8 @@ Example_server.py
     - Added some server side features as a test.
     - This code only servers as a quide to make fully working ChatRoom
 
+Cryptography_tests.py
+
+[Source](https://www.geeksforgeeks.org/fernet-symmetric-encryption-using-cryptography-module-in-python/)
+
+    - Contains example of Fernet symmetric encryption method used by the users when sending messages back and forth
